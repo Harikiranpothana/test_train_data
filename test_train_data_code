@@ -1,0 +1,46 @@
+import os
+import shutil
+import random
+
+# Path to your preprocessed dataset (with nested folders)
+input_folder = r"C:\Users\ASUS\preprocessed_dataset"
+
+# Output folder for train/val split
+output_folder = r"C:\Users\ASUS\yolo_dataset"
+
+# Train/Val split ratio
+train_ratio = 0.8  # 80% train, 20% val
+
+# Collect all class folders
+classes = [d for d in os.listdir(input_folder) if os.path.isdir(os.path.join(input_folder, d))]
+
+for cls in classes:
+    class_path = os.path.join(input_folder, cls)
+    images = [f for f in os.listdir(class_path) if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
+
+    # Shuffle images
+    random.shuffle(images)
+
+    # Split
+    split_index = int(len(images) * train_ratio)
+    train_files = images[:split_index]
+    val_files = images[split_index:]
+
+    # Define train/val class folders
+    train_class_folder = os.path.join(output_folder, "train", cls)
+    val_class_folder = os.path.join(output_folder, "val", cls)
+
+    # Make directories
+    os.makedirs(train_class_folder, exist_ok=True)
+    os.makedirs(val_class_folder, exist_ok=True)
+
+    # Copy train files
+    for file in train_files:
+        shutil.copy(os.path.join(class_path, file), os.path.join(train_class_folder, file))
+
+    # Copy val files
+    for file in val_files:
+        shutil.copy(os.path.join(class_path, file), os.path.join(val_class_folder, file))
+
+print("✅ Dataset split completed!")
+print(f"Train and Val folders created inside: {output_folder}")
